@@ -408,9 +408,6 @@ const Monitor3d = (() => {
 		setDecoPlaneRotation(plane, 1);
 		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
 
-    plane.rotation.x = 1;
-    plane.rotation.y = 1;
-
     //bottom에 cylinderGeometry 요소 하나 추가하기
 
     //바닥에 별 그리기(삼각형 두 개)
@@ -436,8 +433,8 @@ const Monitor3d = (() => {
 
 		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
 
-    plane.rotation.x = 1;
-    plane.rotation.y = 1;
+    // plane.rotation.x = 1;
+    // plane.rotation.y = 1;
 
 	}
 
