@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+<meta charset="UTF-8" />
+<title>Neighbor21 Test</title>
+<meta name="viewport" content="width=768, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="format-detection" content="telephone=no">
+<style>
+  @charset "utf-8";
+  html, body, ul, li, p {margin: 0; padding: 0;}
+  html, body {height: 100%; overflow: hidden;}
+  body {background: radial-gradient(circle at 50% 100%, #00293e 0%, #000b29 100%);}
+
+  .visual-wrap{position: absolute; left: 200px; right: 200px; bottom: 200px; height: 636px;}
+  #visual {position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 100%;}
+
+  /* #visual{position: absolute; left: 0; right: 0; top: 0; height: 100vh; background: radial-gradient(circle at 50% 100%, #0e5173 0%, #000b29 100%);} */
+</style>
+</head>
+
+<body>
+
+<div class="visual-wrap">
+  <div id="visual"></div>
+</div>
+
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+		}
+	}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.1/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stats-js@1.0.1/build/stats.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.1/dist/lil-gui.umd.min.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { MapControls } from 'three/addons/controls/MapControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+
+window._DEBUG = location.search.indexOf('debug') > -1;
+window._DEBUG && document.documentElement.classList.add('_DEBUG');
+
+
+// 데이터 전송할 때 쓰는 건 가봄??
+// fetch('./sample-data.json')
+// 	.then((response) => response.json())
+// 	.then((data) => {
+// 		Monitor3d.init(
+// 			data,
+// 			(userInfo) => {
+// 				console.log('card click', userInfo);
+// 			},
+// 			(userInfo) => {
+// 				console.log('similarity click', userInfo);
+// 			},
+// 			(userInfo) => {
+// 				console.log('intimacy click', userInfo);
+// 			}
+// 		);
+// 	});
+
+
+const Monitor3d = (() => {
+	const PI = Math.PI;
+	const PI2 = PI * 2;
+	const PI_HALF = PI / 2;
+
+
+	let data, onCardClick, onSimilarityClick, onIntimacyClick;
+
+	let $visual;
+
+	let areaWidth, areaHeight;
+
+	let scene, camera, renderer, composer, bloomPass;
+	let decoGroup, decoTimeline;
+
+	const canvasSize = 1024;
+
+	const degToRad = THREE.MathUtils.degToRad;
+
+	let gui, stats, control;
+
+
+	function init (_data, _onCardClick, _onSimilarityClick, _onIntimacyClick) {
+		data = _data;
+		onCardClick = _onCardClick;
+		onSimilarityClick = _onSimilarityClick;
+		onIntimacyClick = _onIntimacyClick;
+
+		if ($visual) {
+			// reset data?
+			return;
+		}
+
+		$visual = document.querySelector('#visual');
+
+		onResize();
+
+		scene = new THREE.Scene();
+
+		camera = new THREE.PerspectiveCamera(52, areaWidth / areaHeight, 1, 1000);
+		camera.position.set(0, 0, 15);
+		camera.zoom = 2;
+
+		renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+		$visual.appendChild(renderer.domElement);
+
+		if (window._DEBUG) {
+			gui = new lil.GUI();
+			gui.add(camera.position, 'z', 0, 50, 0.001).name('camera z');
+			gui.add(camera, 'zoom', 0, 10, 0.001).name('camera zoom').onChange(() => camera.updateProjectionMatrix());
+
+			stats = new Stats();
+			document.body.appendChild(stats.dom);
+
+			control = new OrbitControls(camera, renderer.domElement);
+		}
+
+		decoGroup = new THREE.Group();
+		decoTimeline = gsap.timeline();
+
+		decoGroup.rotation.x = -PI_HALF;
+		decoGroup.position.y = -0.2;
+		scene.add(decoGroup);
+
+
+		composer = new EffectComposer(renderer);
+		composer.addPass(new RenderPass(scene, camera));
+		const baseVertexShader = `
+			varying vec2 v_uv;
+
+			void main() {
+				v_uv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+		`;
+
+		bloomPass = new ShaderPass({
+			uniforms: {
+				tDiffuse: { value: null },
+				u_threshold: { value: 0.1 },
+				u_intensity: { value: 0.9 },
+				u_blurSize: { value: 2.5 },
+				u_resolution: { value: new THREE.Vector2() }
+			},
+			vertexShader: baseVertexShader,
+			fragmentShader: `
+				uniform sampler2D tDiffuse;
+				uniform float u_threshold;
+				uniform float u_intensity;
+				uniform float u_blurSize;
+
+				varying vec2 v_uv;
+
+				// https://www.shadertoy.com/view/Ms2Xz3
+				vec4 blurColor (vec2 st) {
+					vec2 texelSize = u_blurSize / vec2(1328.0 * 2.0, 726.0 * 2.0);
+
+					vec4 color = texture2D(tDiffuse, st, u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(texelSize.x, 0.0), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(-texelSize.x, 0.0), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(0.0, texelSize.y), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(0.0, -texelSize.y), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(texelSize.x, texelSize.y), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(-texelSize.x, texelSize.y), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(texelSize.x, -texelSize.y), u_blurSize);
+					color += texture2D(tDiffuse, st + vec2(-texelSize.x, -texelSize.y), u_blurSize);
+
+					return color / 8.0;
+				}
+
+				void main () {
+					vec4 color = texture2D(tDiffuse, v_uv);
+					vec4 highlight = clamp(blurColor(v_uv) - u_threshold, 0.0, 1.0) * 1.0 / (1.0 - u_threshold);
+
+					gl_FragColor = 1.0 - (1.0 - color) * (1.0 - highlight * u_intensity);
+				}
+			`
+		});
+		composer.addPass(bloomPass);
+
+		if (window._DEBUG) {
+			gui.add(bloomPass.uniforms.u_threshold, 'value', 0, 1, 0.001).name('bloom threshold');
+			gui.add(bloomPass.uniforms.u_intensity, 'value', 0, 2, 0.001).name('bloom intensity');
+			gui.add(bloomPass.uniforms.u_blurSize, 'value', 0, 5, 0.001).name('bloom blurSize');
+		}
+
+		composer.addPass(new ShaderPass({
+			uniforms: {
+				tDiffuse: { value: null }
+			},
+			vertexShader: baseVertexShader,
+			fragmentShader: `
+				#define PI ${ PI }
+				#define PI_HALF ${ PI_HALF }
+
+				uniform sampler2D tDiffuse;
+
+				varying vec2 v_uv;
+
+				float random (in vec2 st) {
+					return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+				}
+
+				float easeOutExpo (float t) {
+					return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+				}
+
+				float numsamples = 50.0;
+				void main () {
+					vec4 color = texture2D(tDiffuse, v_uv);
+
+					vec2 tocenter = vec2(0.5, -1.0) - v_uv;
+
+					for (float i = 0.0; i < numsamples; i++) {
+						float lerp = (i + random(vec2(gl_FragCoord.xy))) / numsamples;
+
+						// float weight = cos(lerp * PI_HALF);
+						float weight = (1.0 - easeOutExpo(lerp)) * 4.5;
+						vec4 sampled = texture2D(tDiffuse, v_uv + tocenter * lerp * 0.25);
+
+						color += sampled * weight * 0.03;
+					}
+
+					gl_FragColor = color;
+				}
+			`
+		}));
+
+
+		createDecoPlanes();
+
+
+		window.addEventListener('resize', onResize);
+		onResize();
+
+		gsap.ticker.add(animate);
+	}
+
+	function createDecoPlanes () {
+		let plane;
+
+		// □ □ □
+		plane = createDecoPlane(7, () => {
+			const { $canvas, context } = createCanvas();
+
+			const innerRadius = canvasSize / 2 - canvasSize / 6;
+			const eachAngle = 360 / 9;
+			const arcAngle = degToRad(eachAngle - 11);
+			const lineWidth = 5;
+
+			context.lineWidth = lineWidth;
+			context.strokeStyle = 'rgba(0, 170, 255, 0.5)';
+
+			for (let i = 0; i < 9; i++) {
+				context.translate(canvasSize / 2, canvasSize / 2);
+				context.rotate(degToRad(eachAngle));
+				context.translate(-canvasSize / 2, -canvasSize / 2);
+				context.beginPath();
+				context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
+				context.lineTo(
+					canvasSize / 2 + Math.cos(arcAngle) * innerRadius,
+					canvasSize / 2 + Math.sin(arcAngle) * innerRadius
+				);
+				context.arc(canvasSize / 2, canvasSize / 2, innerRadius - lineWidth / 2, arcAngle, 0, true);
+				context.closePath();
+				context.stroke();
+			}
+			
+			return $canvas;
+		});
+		plane.position.z = -2.47;
+
+		setDecoPlaneRotation(plane);
+    // decoTimeline.fromTo(plane.rotation, { x: degToRad(12), y: degToRad(10), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut' }, 0.1);
+		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0);
+
+		// ■ ■  ■
+		[
+			[40, 10, 30],
+			[50, 10, 20],
+			[25, 15, 25],
+			[30, 5, 35],
+			[20, 15, 30]
+		].forEach((lineInfo, index) => {
+			plane = createDecoPlane(6.5, () => {
+				const { $canvas, context } = createCanvas();
+				const lineWidth = canvasSize / 7;
+
+				context.lineWidth = lineWidth;
+        context.strokeStyle = 'rgba(0, 170, 255, 0.3)';
+
+				for (let i = 0, lastAngle = 0; i < lineInfo.length; i++) {
+					const angle = degToRad(lineInfo[i]);
+					if (i % 2 === 0) {
+						context.beginPath();
+						context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, lastAngle, lastAngle + angle);
+						context.stroke();
+					}
+					lastAngle += angle;
+				}
+				
+				return $canvas;
+			});
+			plane.rotation.z = PI_HALF * index;
+			plane.position.z = -2.4 + 0.001 * index;
+
+			setDecoPlaneRotation(plane);
+			decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0);
+		});
+
+		// ||||||||
+		plane = createDecoPlane(5.8, () => {
+			const { $canvas, context } = createCanvas();
+
+			const eachAngle = 360 / 160;
+			const lineWidth = 6;
+
+			context.lineWidth = lineWidth;
+      context.strokeStyle = 'rgba(0, 170, 255, 0.8)';
+
+			for (let i = 0; i < 160; i++) {
+				context.translate(canvasSize / 2, canvasSize / 2);
+				context.rotate(degToRad(eachAngle));
+				context.translate(-canvasSize / 2, -canvasSize / 2);
+				context.beginPath();
+				context.moveTo(0, canvasSize / 2);
+				context.lineTo(30, canvasSize / 2);
+				context.stroke();
+			}
+			
+			return $canvas;
+		});
+		plane.position.z = -2.25;
+
+		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
+
+		// -_-_-
+		for (let i = 0; i < 3; i++) {
+			const radius = 3.9 + 0.55 * i;
+			plane = createDecoPlane(radius, () => {
+				const { $canvas, context } = createCanvas();
+
+				const lineWidth = 45;
+
+				context.lineWidth = lineWidth;
+        context.strokeStyle = 'rgba(0, 170, 255, 0.4)';
+
+				for (let j = 0, lastAngle = 0; j < 999; j++) {
+					const angle = degToRad(j % 2 === 0 ? Math.random() * 30 + 5 :  Math.random() * 5 + 2);
+					if (j % 2 === 0) {
+						context.beginPath();
+						context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, lastAngle, lastAngle + angle);
+						context.stroke();
+					}
+					lastAngle += angle;
+					if (lastAngle > PI2) {
+						break;
+					}
+				}
+				
+				return $canvas;
+			});
+			plane.rotation.z = PI_HALF * i;
+			plane.position.z = -2.1;
+
+			gsap.to(plane.rotation, { z: i % 2 === 0 ? -PI2 : PI2, duration: 15, ease: 'linear', repeat: -1 });
+			decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.15);
+		}
+
+		// top
+		plane = createDecoPlane(3.1, () => {
+			const canvasSize = 512;
+			const { $canvas, context } = createCanvas(canvasSize);
+
+			const eachAngle = 360 / 6;
+			const arcAngle = degToRad(eachAngle - 5);
+			const lineWidth = 20;
+
+			context.lineWidth = lineWidth;
+      context.strokeStyle = 'rgba(0, 170, 255, 1)';
+
+			for (let i = 0; i < 6; i++) {
+				context.translate(canvasSize / 2, canvasSize / 2);
+				context.rotate(degToRad(eachAngle));
+				context.translate(-canvasSize / 2, -canvasSize / 2);
+				context.beginPath();
+				context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
+				context.stroke();
+			}
+			
+			return $canvas;
+		});
+		plane.position.z = -1.77;
+
+		setDecoPlaneRotation(plane, 1);
+		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
+
+    plane.rotation.x = 1;
+    plane.rotation.y = 1;
+
+    //bottom에 cylinderGeometry 요소 하나 추가하기
+
+    //바닥에 별 그리기(삼각형 두 개)
+		plane = createDecoPlane(5.8, () => {
+			const { $canvas, context } = createCanvas();
+
+			// const eachAngle = 360 / 1;
+			const lineWidth = 10;
+
+			context.lineWidth = lineWidth;
+      context.strokeStyle = 'red';
+
+        context.beginPath();            // 새로운 경로 시작
+        context.moveTo(100, 100);       // 시작점 설정
+        context.lineTo(800, 400);       // 첫 번째 선 그리기
+        context.lineTo(400, 800);       // 두 번째 선 그리기
+        context.closePath();            // 경로 닫기 (마지막 선을 시작점과 연결)
+        context.stroke();               // 선으로 삼각형 그리기
+			
+			return $canvas;
+		});
+		plane.position.z = -2.5;
+
+		decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
+
+    plane.rotation.x = 1;
+    plane.rotation.y = 1;
+
+	}
+
+	function createDecoPlane (size, textureGenerator) {
+		const plane = new THREE.Mesh(
+			new THREE.PlaneGeometry(size, size),
+			new THREE.MeshBasicMaterial({
+				transparent: true,
+				depthTest: false,
+				map: new THREE.CanvasTexture(textureGenerator())
+			})
+		);
+		plane.material.map.minFilter = THREE.NearestFilter;
+		// plane.material.map.magFilter = THREE.NearestFilter;
+		decoGroup.add(plane);
+		return plane;
+	}
+
+	function onDecoPlaneTimelineUpdate (plane) {
+		plane.scale.y = plane.scale.x;
+	}
+
+	function setDecoPlaneRotation (plane, durationBase = 2) {
+		gsap.to(plane.rotation, { z: plane.rotation.z + (Math.random() * PI - PI_HALF), duration: Math.random() * durationBase + durationBase, ease: Back.easeInOut.config(5), onComplete: setDecoPlaneRotation, onCompleteParams: [plane, durationBase] });
+	}
+
+	function createCanvas (size) {
+		const $canvas = document.createElement('canvas');
+		$canvas.width = $canvas.height = size || canvasSize;
+		return {
+			$canvas,
+			context: $canvas.getContext('2d')
+		};
+	}
+
+	function onResize () {
+		areaWidth = $visual.offsetWidth;
+		areaHeight = $visual.offsetHeight;
+
+		if (renderer) {
+			const pixelRatio = Math.min(2, window.devicePixelRatio);
+
+			camera.aspect = areaWidth / areaHeight;
+			camera.updateProjectionMatrix();
+
+			composer.setSize(areaWidth * pixelRatio, areaHeight * pixelRatio);
+			bloomPass.uniforms.u_resolution.value.set(areaWidth * pixelRatio, areaHeight * pixelRatio);
+
+			renderer.setSize(areaWidth, areaHeight);
+			renderer.setPixelRatio(pixelRatio);
+		}
+	}
+
+	let numRendered = 0;
+	function animate (time, deltaTime) {
+		stats && stats.update();
+		control && control.update();
+
+		composer.render(deltaTime);
+
+		window._DEBUG && console.log('render', renderer.info.render.calls);
+	}
+
+	return { init };
+})();
+
+
+// print sample data
+const sampleUsers = [
+	{
+		"sid": "sid-100",
+		"riskpoint": "20",
+		"name": "홍지원",
+		"deptNm": "사업부",
+		"gridColor": "#F5F232"
+	},
+	{
+		"sid": "sid-101",
+		"riskpoint": "80",
+		"name": "이수연",
+		"deptNm": "영업부",
+		"gridColor": "#F5F232"
+	},
+	{
+		"sid": "sid-102",
+		"riskpoint": "70",
+		"name": "윤준원",
+		"deptNm": "영업부",
+		"gridColor": "#F5F232"
+	},
+	{
+		"sid": "sid-103",
+		"name": "김인사",
+		"deptNm": "인사부"
+	},
+	{
+		"sid": "sid-104",
+		"name": "이개발",
+		"deptNm": "개발부"
+	},
+	{
+		"sid": "sid-105",
+		"name": "박사업",
+		"deptNm": "사업부"
+	},
+	{
+		"sid": "sid-106",
+		"name": "최인사",
+		"deptNm": "인사부"
+	},
+	{
+		"sid": "sid-107",
+		"name": "정영업",
+		"deptNm": "영업부"
+	},
+	{
+		"sid": "sid-108",
+		"name": "장사업",
+		"deptNm": "사업부"
+	},
+	{
+		"sid": "sid-109",
+		"name": "박사업",
+		"deptNm": "사업부"
+	}
+];
+
+const sampleData = { list: [] };
+sampleUsers.forEach((user) => {
+	user.corpNm = '네이버시스템';
+	user.riskpoint = user.riskpoint || Math.floor(Math.random() * 10) * 10;
+	user.gridColor = user.gridColor || '#F5F232';
+});
+sampleUsers.forEach((user) => {
+	const item = user;
+	item.intimacyList = [];
+	item.similarityList = [];
+
+	['intimacyList', 'similarityList'].forEach((listName) => {
+		const sampleUsersClone = sampleUsers.slice();
+		sampleUsersClone.splice(sampleUsers.indexOf(user), 1);
+
+		const numList = Math.floor(Math.random() * 5);
+		for (let i = 0; i < numList; i++) {
+			const _user = { ...sampleUsersClone.splice(Math.floor(Math.random() * sampleUsersClone.length), 1)[0] };
+			delete _user.intimacyList;
+			delete _user.similarityList;
+			item[listName].push(_user);
+		}
+	});
+
+	sampleData.list.push(item);
+});
+// console.log(JSON.stringify(sampleData, null, '\t'));
+
+const monitorOptions = {
+  speed: 1,
+  delay: 15, // 최소 3,
+  lightSpeed: 1,
+  lightColor: '#fcf8e1', // 기본값 #fcf8e1
+  onChangeActive: (data) => { console.log('슬라이드 가운데 위치 / 유저 정보 : ', data) },
+  onClickActiveSlide: (data) => { console.log('슬라이드 클릭 / 유저 정보 : ', data) },
+  onClickSimilarityList: (data) => { console.log('유사도 게시판 클릭 / 유저 정보 : ', data) },
+  onClickIntimacyList: (data) => { console.log('친밀도 게시판 클릭 / 유저 정보 : ', data) },
+}
+
+const monitor3d = Monitor3d.init('#visual', sampleUsers, monitorOptions);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
