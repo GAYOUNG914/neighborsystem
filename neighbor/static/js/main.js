@@ -1,3 +1,4 @@
+import '../themes/reset.css'
 import '../themes/style.css'
 import javascriptLogo from '/public/static/javascript.svg'
 import viteLogo from '/public/static/vite.svg'

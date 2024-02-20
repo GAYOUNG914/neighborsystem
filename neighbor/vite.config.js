@@ -41,6 +41,18 @@ const dateFormat = (date) => {
 
 export default defineConfig({
 	base: '',
+  // css: {
+  //   preprocessorOptions: {
+  //     scss: {
+  //       additionalData: `@import "./static/themes/style.scss";`
+  //     }
+  //   }
+  // },
+  // resolve: {
+  //   alias: {
+  //     '@': resolve(__dirname, 'src')
+  //   }
+  // },
 	build: {
 		outDir: './build',
 		emptyOutDir: true,
@@ -51,6 +63,7 @@ export default defineConfig({
         main: resolve(__dirname, '/index.html'),
         fave: resolve(__dirname, '/fave.html'),
         themeStyleWhite: resolve(__dirname, '/static/themes/white/scss/style.scss')
+        // themeStyleWhite: resolve(__dirname, '/static/themes/style.scss')
       },
 			output: {
 				assetFileNames: (assetInfo) => {
