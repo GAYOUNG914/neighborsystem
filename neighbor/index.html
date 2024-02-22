@@ -13,9 +13,25 @@
 
 <body>
 
-  <div class="visual-wrap ai-monitor">
-    <div id="visual" class="visual"></div>
-  </div>
+  <main class="contents">
+      <div id="visual" class="visual">
+      </div>
+  
+    <div class="carousel">
+      <div class="carousel-track">
+  
+        <div class="crousel-slide">
+          <div class="slide-content">
+              <picture class="img knight">
+                <img src="./public/static/themes/img/knight.webp" alt="">
+              </picture>
+          </div>
+  
+        </div>
+      </div>
+      <div class="carousel-btns"></div>
+    </div>
+  </main>
 
   <script type="module" src="static/js/script.js"></script>
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -91,6 +107,8 @@
       onSimilarityClick = _onSimilarityClick;
       onIntimacyClick = _onIntimacyClick;
 
+      document.querySelector('.carousel').classList.add('active');
+
       if ($visual) {
         // reset data?
         return;
@@ -123,13 +141,18 @@
       decoGroup = new THREE.Group();
       decoTimeline = gsap.timeline();
 
+
       // decoGroup.rotation.x = -PI_HALF; // 오브젝트 세우기~
       decoGroup.position.y = -0.2;
       scene.add(decoGroup);
 
+      decoTimeline.fromTo(decoGroup.rotation, { x: degToRad(0), y: degToRad(0), }, { x: degToRad(-90), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
-      composer = new EffectComposer(renderer);
-      composer.addPass(new RenderPass(scene, camera));
+
+      composer = new EffectComposer(renderer); //시각적 후처리 효과를 위해 사용하는 클래스
+      composer.addPass(new RenderPass(scene, camera)); //씬과 카메라에 대한 렌더링이 이루어진 후 후처리 효과 적용
+
+      //쉐이더.. 이거 클론 끝나면 쉐이더 봐야지
       const baseVertexShader = `
         varying vec2 v_uv;
 
@@ -189,7 +212,6 @@
         gui.add(bloomPass.uniforms.u_blurSize, 'value', 0, 5, 0.001).name('bloom blurSize');
       }
 
-      //쉐이더
       // composer.addPass(new ShaderPass({
       //   uniforms: {
       //     tDiffuse: { value: null }
@@ -255,21 +277,25 @@
         const lineWidth = 5;
 
         context.lineWidth = lineWidth;
-        context.strokeStyle = 'rgba(0, 170, 255, 0.5)';
+        // context.strokeStyle = 'rgba(0, 170, 255, 0.5)';
+        context.strokeStyle = 'rgba(255, 0, 0, 0.9)';
+        // context.fillStyle = 'rgba(255, 0, 0, 0.2)';
 
         for (let i = 0; i < 9; i++) {
-          context.translate(canvasSize / 2, canvasSize / 2);
+          context.translate(canvasSize / 2, canvasSize / 2); //현재 위치에서 이동
           context.rotate(degToRad(eachAngle));
           context.translate(-canvasSize / 2, -canvasSize / 2);
           context.beginPath();
-          context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
+          context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 4, arcAngle); //원 그리는 데 arc() 메서드 잘 사용됨
+          //x, y, radius, startAngle, endAngle [, anticlockwise]
           context.lineTo(
             canvasSize / 2 + Math.cos(arcAngle) * innerRadius,
             canvasSize / 2 + Math.sin(arcAngle) * innerRadius
           );
-          context.arc(canvasSize / 2, canvasSize / 2, innerRadius - lineWidth / 2, arcAngle, 0, true);
+          context.arc(canvasSize / 2, canvasSize / 2, innerRadius - lineWidth / 2, arcAngle, 0, false);
           context.closePath();
           context.stroke();
+          // context.fill();
         }
         
         return $canvas;
@@ -279,53 +305,9 @@
       setDecoPlaneRotation(plane);
       // decoTimeline.fromTo(plane.rotation, { x: degToRad(12), y: degToRad(10), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut' }, 0.1);
       decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0);
+      // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
       // □ □ □ - 2
-      // plane = new THREE.Mesh(
-      //   new THREE.PlaneGeometry(3.5, 3.5),
-      //   new THREE.MeshBasicMaterial({
-      //     // color: 'red',
-      //     transparent: true,
-      //     depthTest: false,
-      //     map: new THREE.CanvasTexture(
-      //       () => {
-      //         const { $canvas, context } = createCanvas();
-
-      //         const innerRadius = canvasSize / 2 - canvasSize / 6;
-      //         const eachAngle = 360 / 9;
-      //         const arcAngle = degToRad(eachAngle - 11);
-      //         const lineWidth = 2;
-
-      //         context.lineWidth = lineWidth;
-      //         context.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-      //         context.fillStyle = 'rgba(255, 0, 0, 0.5)';
-
-      //         for (let i = 0; i < 9; i++) {
-      //           context.translate(canvasSize / 2, canvasSize / 2);
-      //           context.rotate(degToRad(eachAngle));
-      //           context.translate(-canvasSize / 2, -canvasSize / 2);
-      //           context.beginPath();
-      //           context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
-      //           context.lineTo(
-      //             canvasSize / 2 + Math.cos(arcAngle) * innerRadius,
-      //             canvasSize / 2 + Math.sin(arcAngle) * innerRadius
-      //           );
-      //           context.arc(canvasSize / 2, canvasSize / 2, innerRadius - lineWidth / 2, arcAngle, 0, true);
-      //           context.closePath();
-      //           context.stroke();
-      //           context.fill();
-      //         }
-              
-      //         return $canvas;
-      //       }
-      //     )
-      //   })
-      // );
-      // // plane.material.map.minFilter = THREE.NearestFilter;
-      // // plane.material.map.magFilter = THREE.NearestFilter;
-      // decoGroup.add(plane);
-
-
       plane = createDecoPlane(3.5, () => {
         const { $canvas, context } = createCanvas();
 
@@ -335,8 +317,10 @@
         const lineWidth = 2;
 
         context.lineWidth = lineWidth;
-        context.strokeStyle = 'rgba(0, 170, 255, 0.5)';
-        context.fillStyle = 'rgba(0, 170, 255, 0.1)';
+        // context.strokeStyle = 'rgba(0, 170, 255, 0.5)';
+        // context.fillStyle = 'rgba(0, 170, 255, 0.1)';
+        context.strokeStyle = 'rgba(255, 0, 0, 0.4)';
+        context.fillStyle = 'rgba(255, 0, 0, 0.3)';
 
         for (let i = 0; i < 9; i++) {
           context.translate(canvasSize / 2, canvasSize / 2);
@@ -361,6 +345,7 @@
       setDecoPlaneRotation(plane);
       // decoTimeline.fromTo(plane.rotation, { x: degToRad(12), y: degToRad(10), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut' }, 0.1);
       decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0);      
+      // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
       // ■ ■  ■
       [
@@ -368,14 +353,18 @@
         [50, 10, 20],
         [25, 15, 25],
         [30, 5, 35],
-        [20, 15, 30]
+        [20, 15, 30],
+        [50, 10, 20],
+        [30, 5, 35],
+        [25, 15, 25]
       ].forEach((lineInfo, index) => {
-        plane = createDecoPlane(6.5, () => {
+        plane = createDecoPlane(7, () => {
           const { $canvas, context } = createCanvas();
-          const lineWidth = canvasSize / 7;
+          const lineWidth = canvasSize / 6;
 
           context.lineWidth = lineWidth;
-          context.strokeStyle = 'rgba(0, 170, 255, 0.3)';
+          // context.strokeStyle = 'rgba(255, 99, 0, 0.2)';
+          context.strokeStyle = 'rgba(255, 0, 0, 0.2)';
 
           for (let i = 0, lastAngle = 0; i < lineInfo.length; i++) {
             const angle = degToRad(lineInfo[i]);
@@ -390,21 +379,22 @@
           return $canvas;
         });
         plane.rotation.z = PI_HALF * index;
-        plane.position.z = -2.4 + 0.001 * index;
+        plane.position.z = -2.5 + 0.001 * index;
 
         setDecoPlaneRotation(plane);
         decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0);
+        // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
       });
 
       // ||||||||
-      plane = createDecoPlane(5.8, () => {
+      plane = createDecoPlane(4.9, () => {
         const { $canvas, context } = createCanvas();
 
         const eachAngle = 360 / 160;
-        const lineWidth = 7;
+        const lineWidth = 8;
 
         context.lineWidth = lineWidth;
-        context.strokeStyle = 'rgba(0, 170, 255, 0.8)';
+        context.strokeStyle = 'rgba(255, 0, 0, 0.8)';
 
         for (let i = 0; i < 160; i++) {
           context.translate(canvasSize / 2, canvasSize / 2);
@@ -421,6 +411,7 @@
       plane.position.z = -2.25;
 
       decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
+      // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
       // -_-_-
       for (let i = 0; i < 3; i++) {
@@ -428,10 +419,10 @@
         plane = createDecoPlane(radius, () => {
           const { $canvas, context } = createCanvas();
 
-          const lineWidth = 45;
+          const lineWidth = 15;
 
           context.lineWidth = lineWidth;
-          context.strokeStyle = 'rgba(0, 170, 255, 0.4)';
+          context.strokeStyle = 'rgba(255, 0, 0, 0.7)';
 
           for (let j = 0, lastAngle = 0; j < 999; j++) {
             const angle = degToRad(j % 2 === 0 ? Math.random() * 30 + 5 :  Math.random() * 5 + 2);
@@ -453,31 +444,32 @@
 
         gsap.to(plane.rotation, { z: i % 2 === 0 ? -PI2 : PI2, duration: 15, ease: 'linear', repeat: -1 });
         decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.15);
+        // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
       }
 
 
       // prime
-      plane = createDecoPlane(3.6, () => {
-        const canvasSize = 512;
-        const { $canvas, context } = createCanvas(canvasSize);
+      // plane = createDecoPlane(4.9, () => {
+      //   const canvasSize = 512;
+      //   const { $canvas, context } = createCanvas(canvasSize);
 
-        const eachAngle = 360 / 1;
-        const arcAngle = degToRad(eachAngle - 5);
-        const lineWidth = 5;
+      //   const eachAngle = 720;
+      //   const arcAngle = degToRad(eachAngle - 5);
+      //   const lineWidth = 4;
 
-        context.lineWidth = lineWidth;
-        context.strokeStyle = 'rgba(0, 170, 255, 0.7)';
+      //   context.lineWidth = lineWidth;
+      //   context.strokeStyle = 'rgba(255, 0, 0, 0.7)';
 
-          context.beginPath();
-          context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
-          context.stroke();
+      //     context.beginPath();
+      //     context.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - lineWidth / 2, 0, arcAngle);
+      //     context.stroke();
         
-        return $canvas;
-      });
-      plane.position.z = -1.9;
+      //   return $canvas;
+      // });
+      // plane.position.z = -1.9;
 
-      setDecoPlaneRotation(plane, 1);
-      decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
+      // setDecoPlaneRotation(plane, 1);
+      // decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
 
       // top
       plane = createDecoPlane(3.1, () => {
@@ -486,10 +478,10 @@
 
         const eachAngle = 360 / 6;
         const arcAngle = degToRad(eachAngle - 5);
-        const lineWidth = 20;
+        const lineWidth = 10;
 
         context.lineWidth = lineWidth;
-        context.strokeStyle = 'rgba(0, 170, 255, 1)';
+        context.strokeStyle = 'rgba(255, 0, 0, 0.8)';
 
         for (let i = 0; i < 6; i++) {
           context.translate(canvasSize / 2, canvasSize / 2);
@@ -502,38 +494,57 @@
         
         return $canvas;
       });
-      plane.position.z = -1.77;
+      plane.position.z = -1.55;
 
       setDecoPlaneRotation(plane, 1);
       decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
+      // decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
+
+
+      //top 기둥
+      plane = new THREE.Mesh(
+      new THREE.CylinderGeometry( 1.55, 1.55, .06, 32, 1, true ),
+      new THREE.MeshBasicMaterial({ 
+        color: 'rgba(255, 0, 0)', 
+        opacity: '0.6',
+        side: THREE.DoubleSide,
+				transparent: true,
+				depthTest: false,
+      })
+    );
+    scene.add(plane);
+    plane.position.y = -1.85;
+    decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
+    decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
+
 
       //bottom에 cylinderGeometry 요소 하나 추가하기
 
       //★
-      plane = createDecoPlane(7, () => {
-        const { $canvas, context } = createCanvas();
+      // plane = createDecoPlane(7, () => {
+      //   const { $canvas, context } = createCanvas();
 
-        // const canvasObj = createCanvas();
-        // const $canvas = canvasObj.$canvas;
-        // const context = canvasObj.context;
+      //   // const canvasObj = createCanvas();
+      //   // const $canvas = canvasObj.$canvas;
+      //   // const context = canvasObj.context;
 
-        const lineWidth = 10;
+      //   const lineWidth = 10;
 
-        context.lineWidth = lineWidth;
-        context.strokeStyle = 'red';
+      //   context.lineWidth = lineWidth;
+      //   context.strokeStyle = 'red';
 
-          context.beginPath();            // 새로운 경로 시작
-          context.moveTo(250, 250);       // 시작점 설정
-          context.lineTo(800, 400);       // 첫 번째 선 그리기
-          context.lineTo(400, 800);       // 두 번째 선 그리기
-          context.closePath();            // 경로 닫기 (마지막 선을 시작점과 연결)
-          context.stroke();               // 선으로 삼각형 그리기
+      //     context.beginPath();            // 새로운 경로 시작
+      //     context.moveTo(250, 250);       // 시작점 설정
+      //     context.lineTo(800, 400);       // 첫 번째 선 그리기
+      //     context.lineTo(400, 800);       // 두 번째 선 그리기
+      //     context.closePath();            // 경로 닫기 (마지막 선을 시작점과 연결)
+      //     context.stroke();               // 선으로 삼각형 그리기
         
-        return $canvas;
-      });
-      plane.position.z = -2.5;
+      //   return $canvas;
+      // });
+      // plane.position.z = -2.5;
 
-      decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
+      // decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
 
       // plane.rotation.x = 1;
       // plane.rotation.y = 1;
