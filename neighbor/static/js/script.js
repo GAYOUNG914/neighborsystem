@@ -121,3 +121,7 @@
 
 
 //img gsap
+const carousel = document.querySelector('.carousel');
+const robotImgs = document.querySelectorAll('.img');
+
+gsap.to( carousel, { y: -150, opacity: 1, scale: 1, delay: 1.85, duration: 1.4, ease: "expo.out" })

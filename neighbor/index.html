@@ -26,10 +26,14 @@
                 <img src="./public/static/themes/img/knight.webp" alt="">
               </picture>
           </div>
-  
         </div>
+        
       </div>
-      <div class="carousel-btns"></div>
+      <div class="carousel-btns">
+        <div class="btn-prv"></div>
+        <div class="btn-next"></div>
+        <div class="btn-pause"></div>
+      </div>
     </div>
   </main>
 
@@ -77,6 +81,9 @@
   // 			}
   // 		);
   // 	});
+
+  //마법진 색깔 중간중간 노란색으로 바뀌었으면 좋겠음
+  //주변에 파티클 있었으면 좋겠음
 
 
   const Monitor3d = (() => {
@@ -516,38 +523,6 @@
     plane.position.y = -1.85;
     decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
     decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
-
-
-      //bottom에 cylinderGeometry 요소 하나 추가하기
-
-      //★
-      // plane = createDecoPlane(7, () => {
-      //   const { $canvas, context } = createCanvas();
-
-      //   // const canvasObj = createCanvas();
-      //   // const $canvas = canvasObj.$canvas;
-      //   // const context = canvasObj.context;
-
-      //   const lineWidth = 10;
-
-      //   context.lineWidth = lineWidth;
-      //   context.strokeStyle = 'red';
-
-      //     context.beginPath();            // 새로운 경로 시작
-      //     context.moveTo(250, 250);       // 시작점 설정
-      //     context.lineTo(800, 400);       // 첫 번째 선 그리기
-      //     context.lineTo(400, 800);       // 두 번째 선 그리기
-      //     context.closePath();            // 경로 닫기 (마지막 선을 시작점과 연결)
-      //     context.stroke();               // 선으로 삼각형 그리기
-        
-      //   return $canvas;
-      // });
-      // plane.position.z = -2.5;
-
-      // decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.08);
-
-      // plane.rotation.x = 1;
-      // plane.rotation.y = 1;
 
     }
 

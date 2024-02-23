@@ -30,31 +30,21 @@ body {background: radial-gradient(circle at 50% 100%, #00293e 0%, #000b29 100%);
   height: 636px;
 }
 .carousel{
-  /* display: none; */
   position: absolute;
   left: 50%;
-  top: 550px;
-  transform: translateX(-50%) scale(0);
+  top: 400px;
+  transform: translateX(-50%);
   opacity: 0;
-  transition: 1s 1.3s;
-}
-
-.carousel.active{
-  top: 200px;
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
 }
 
 .carousel .img{
   display: inline-block;
   width: 550px;
-  animation: robots 1s infinite alternate;
+  animation: robots 1s ease-in infinite alternate;
 }
 
 .carousel .crousel-slide{
-  /* background: rgba(255,255,255,0.2);
-  border-radius: 100%;
-  box-shadow: 0 0 50px rgba(255,255,255,0.4); */
+
 }
 
 .img.knight{
@@ -66,9 +56,9 @@ picture img{width: 100%;}
 
 @keyframes robots {
   0%{
-    transform: translateY(1%);
+    transform: translateY(-1%);
   }
   100%{
-    transform: translateY(-1%);
+    transform: translateY(1%);
   }
 }
