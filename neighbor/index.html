@@ -7,6 +7,9 @@
 <title>Neighbor21 Test</title>
 <meta name="viewport" content="width=768, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="format-detection" content="telephone=no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./static/themes/reset.css">
 <link rel="stylesheet" href="./static/themes/style.css">
 </head>
@@ -18,12 +21,32 @@
       </div>
   
     <div class="carousel">
+
+      <div class="carousel-btns">
+        <button class="btn btn-prv"></button>
+        <button class="btn btn-next"></button>
+      </div>
+
       <div class="carousel-track">
   
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img knight">
-                <img src="./public/static/themes/img/knight.webp" alt="">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
+              </picture>
+          </div>
+        </div>
+        <div class="crousel-slide">
+          <div class="slide-content">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
+              </picture>
+          </div>
+        </div>
+        <div class="crousel-slide">
+          <div class="slide-content">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
               </picture>
           </div>
         </div>
@@ -43,8 +66,8 @@
         </div>
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img knight">
-                <img src="./public/static/themes/img/knight.webp" alt="">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
               </picture>
           </div>
         </div>
@@ -52,6 +75,20 @@
           <div class="slide-content">
               <picture class="img knight">
                 <img src="./public/static/themes/img/knight.webp" alt="">
+              </picture>
+          </div>
+        </div>
+        <div class="crousel-slide">
+          <div class="slide-content">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
+              </picture>
+          </div>
+        </div>
+        <div class="crousel-slide">
+          <div class="slide-content">
+              <picture class="img robot">
+                <img src="./public/static/themes/img/robot.webp" alt="">
               </picture>
           </div>
         </div>
@@ -64,11 +101,16 @@
         </div>
         
       </div>
-      <div class="carousel-btns">
-        <!-- <button class="btn-prv btn">btn-prv</button> -->
-        <!-- <button class="btn-next btn">btn-next</button> -->
-        <!-- <button class="btn-pause btn">btn-pause</button> -->
-      </div>
+
+    </div>
+
+    <!-- <div class="board">
+      <div class="board-item right"></div>
+      <div class="board-item left"></div>
+    </div> -->
+    <div class="count">
+      <span class="current-index"></span>
+      <span class="slides-length"></span>
     </div>
   </main>
 
@@ -163,7 +205,7 @@
       scene = new THREE.Scene();
 
       camera = new THREE.PerspectiveCamera(52, areaWidth / areaHeight, 1, 1000);
-      camera.position.set(0, 0, 15);
+      camera.position.set(0, 0.5, 15);
       camera.zoom = 2;
 
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -185,7 +227,7 @@
 
 
       // decoGroup.rotation.x = -PI_HALF; // 오브젝트 세우기~
-      decoGroup.position.y = -0.2;
+      decoGroup.position.y = 0.8;
       scene.add(decoGroup);
 
       decoTimeline.fromTo(decoGroup.rotation, { x: degToRad(0), y: degToRad(0), }, { x: degToRad(-90), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
@@ -254,47 +296,47 @@
         gui.add(bloomPass.uniforms.u_blurSize, 'value', 0, 5, 0.001).name('bloom blurSize');
       }
 
-      // composer.addPass(new ShaderPass({
-      //   uniforms: {
-      //     tDiffuse: { value: null }
-      //   },
-      //   vertexShader: baseVertexShader,
-      //   fragmentShader: `
-      //     #define PI ${ PI }
-      //     #define PI_HALF ${ PI_HALF }
+      composer.addPass(new ShaderPass({
+        uniforms: {
+          tDiffuse: { value: null }
+        },
+        vertexShader: baseVertexShader,
+        fragmentShader: `
+          #define PI ${ PI }
+          #define PI_HALF ${ PI_HALF }
 
-      //     uniform sampler2D tDiffuse;
+          uniform sampler2D tDiffuse;
 
-      //     varying vec2 v_uv;
+          varying vec2 v_uv;
 
-      //     float random (in vec2 st) {
-      //       return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-      //     }
+          float random (in vec2 st) {
+            return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+          }
 
-      //     float easeOutExpo (float t) {
-      //       return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
-      //     }
+          float easeOutExpo (float t) {
+            return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
+          }
 
-      //     float numsamples = 50.0;
-      //     void main () {
-      //       vec4 color = texture2D(tDiffuse, v_uv);
+          float numsamples = 50.0;
+          void main () {
+            vec4 color = texture2D(tDiffuse, v_uv);
 
-      //       vec2 tocenter = vec2(0.5, -1.0) - v_uv;
+            vec2 tocenter = vec2(0.5, -1.0) - v_uv;
 
-      //       for (float i = 0.0; i < numsamples; i++) {
-      //         float lerp = (i + random(vec2(gl_FragCoord.xy))) / numsamples;
+            for (float i = 0.0; i < numsamples; i++) {
+              float lerp = (i + random(vec2(gl_FragCoord.xy))) / numsamples;
 
-      //         // float weight = cos(lerp * PI_HALF);
-      //         float weight = (1.0 - easeOutExpo(lerp)) * 4.5;
-      //         vec4 sampled = texture2D(tDiffuse, v_uv + tocenter * lerp * 0.25);
+              // float weight = cos(lerp * PI_HALF);
+              float weight = (1.0 - easeOutExpo(lerp)) * 4.5;
+              vec4 sampled = texture2D(tDiffuse, v_uv + tocenter * lerp * 0.25);
 
-      //         color += sampled * weight * 0.03;
-      //       }
+              color += sampled * weight * 0.03;
+            }
 
-      //       gl_FragColor = color;
-      //     }
-      //   `
-      // }));
+            gl_FragColor = color;
+          }
+        `
+      }));
 
 
       createDecoPlanes();
@@ -545,7 +587,7 @@
 
       //top 기둥
       plane = new THREE.Mesh(
-      new THREE.CylinderGeometry( 1.55, 1.55, .06, 32, 1, true ),
+      new THREE.CylinderGeometry( 1.55, 1.55, .08, 32, 1, true ),
       new THREE.MeshBasicMaterial({ 
         color: 'rgba(255, 0, 0)', 
         opacity: '0.6',
@@ -555,7 +597,7 @@
       })
     );
     scene.add(plane);
-    plane.position.y = -1.85;
+    plane.position.y = -0.85;
     decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
     decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
