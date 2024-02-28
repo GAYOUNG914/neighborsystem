@@ -32,15 +32,13 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
   left: 50%;
   transform: translateX(-50%);
   position: fixed;
-  /* position: absolute; */
   display: flex;
   flex-direction: column;
-  /* justify-content: center; align-items: center; */
   top: 350px;
   opacity: 0;
   z-index: 99;
-  /* overflow: hidden; */
-  padding-bottom: 50px;
+  padding: 0 200px 600px;
+  cursor: pointer;
 }
 
 .carousel .carousel-track{
@@ -74,18 +72,18 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
 }
 
 .carousel .crousel-slide.active{
-  transform: scale(1.3);
+  /* transform: scale(1.3); */
   z-index: 10;
 }
 
-.crousel-slide.prev{
-  opacity: 0.8;
+/* .crousel-slide.prev{
+  opacity: 0.4;
   transform: translate3d(-170px, 70px, -100px) rotateY(20deg) scale(0.9);
 }
 .crousel-slide.next{
-  opacity: 0.8;
+  opacity: 0.4;
   transform: translate3d(170px, 70px, -100px) rotateY(-20deg) scale(0.9);
-}
+} */
 
 .crousel-slide .slide-content{
   display: block;
@@ -136,13 +134,13 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
 picture img{width: 100%;}
 
 .carousel-btns{
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
   margin-bottom: 40px;
-  bottom: 0;
-  left: 2%;
+  z-index: 99;
 }
 
 .carousel-btns .btn{
@@ -182,12 +180,13 @@ picture img{width: 100%;}
 .count{
   font-family: "Micro 5", sans-serif;
   position: absolute;
-  right: 10%;
+  right: -20%;
   bottom: 400px;
   padding: 20px;
   color: white;
   font-size: 24px;
   padding: 0 10px;
+  opacity: 0;
 }
 
 .count .current-index{
