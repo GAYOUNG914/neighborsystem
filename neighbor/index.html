@@ -38,8 +38,8 @@
         </div>
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img robot">
-                <img src="./public/static/themes/img/robot.webp" alt="">
+              <picture class="img white">
+                <img src="./public/static/themes/img/white.webp" alt="">
               </picture>
           </div>
         </div>
@@ -59,8 +59,8 @@
         </div>
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img knight">
-                <img src="./public/static/themes/img/knight.webp" alt="">
+              <picture class="img greenknight">
+                <img src="./public/static/themes/img/greenknight.webp" alt="">
               </picture>
           </div>
         </div>
@@ -73,15 +73,15 @@
         </div>
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img knight">
-                <img src="./public/static/themes/img/knight.webp" alt="">
+              <picture class="img redknight">
+                <img src="./public/static/themes/img/redknight.webp" alt="">
               </picture>
           </div>
         </div>
         <div class="crousel-slide">
           <div class="slide-content">
-              <picture class="img robot">
-                <img src="./public/static/themes/img/robot.webp" alt="">
+              <picture class="img blackrobot">
+                <img src="./public/static/themes/img/blackrobot.webp" alt="">
               </picture>
           </div>
         </div>
@@ -135,6 +135,12 @@
   import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
   import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
   import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+  import Carousel from './static/js/script'
+
+
+  const slideInit = Carousel('.carousel');
+
 
 
   window._DEBUG = location.search.indexOf('debug') > -1;
@@ -205,8 +211,9 @@
       scene = new THREE.Scene();
 
       camera = new THREE.PerspectiveCamera(52, areaWidth / areaHeight, 1, 1000);
-      camera.position.set(0, 0.5, 15);
-      camera.zoom = 2;
+      camera.position.set(0, 2, 15);
+      camera.lookAt(0,-1,0);
+      camera.zoom = 1.6;
 
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       $visual.appendChild(renderer.domElement);
@@ -227,7 +234,7 @@
 
 
       // decoGroup.rotation.x = -PI_HALF; // 오브젝트 세우기~
-      decoGroup.position.y = 0.8;
+      decoGroup.position.y = -0.3;
       scene.add(decoGroup);
 
       decoTimeline.fromTo(decoGroup.rotation, { x: degToRad(0), y: degToRad(0), }, { x: degToRad(-90), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
@@ -596,8 +603,8 @@
 				depthTest: false,
       })
     );
-    scene.add(plane);
-    plane.position.y = -0.85;
+    // scene.add(plane);
+    plane.position.y = -1.95;
     decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
     decoTimeline.fromTo(plane.rotation, { x: degToRad(90), y: degToRad(0), }, { x: degToRad(0), y: degToRad(0), duration: 3, ease: 'expo.inOut', }, 0.1 );
 
