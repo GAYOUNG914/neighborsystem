@@ -35,9 +35,9 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
   position: fixed;
   display: flex;
   flex-direction: column;
-  top: 350px;
+  top: 420px;
   opacity: 0;
-  z-index: 99;
+  z-index: 98;
   padding: 0 200px 600px;
   cursor: pointer;
 }
@@ -143,13 +143,15 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
 picture img{width: 100%;}
 
 .carousel-btns{
-  position: relative;
+  position: fixed;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
   margin-bottom: 40px;
   z-index: 99;
+  left: 45%;
+  top: 16.5%;
 }
 
 .carousel-btns .btn{
@@ -160,7 +162,7 @@ picture img{width: 100%;}
   display: inline-block;
   width: 35px; height: 35px;
   border-radius: 100%;
-  /* opacity: 0; */
+  opacity: 0;
   transition: border-color .3s ease-out,box-shadow .3s ease-out;
 }
 
@@ -187,25 +189,49 @@ picture img{width: 100%;}
   transform: rotate(180deg);
 }
 
+.carousel-btns .btn.play:after{
+  content: '';
+  transform: rotate(0);
+  border-bottom: none;
+  border-left: 2px solid #a2c3ee;
+  height: 16px;
+  top: 25%;
+  left: 33%;
+}
+.carousel-btns .btn.stop:after{
+  content: '';
+  height: 18px;
+  width: 18px;
+  border: none;
+  background: url('data:image/svg+xml; base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZmlsbD0iI2EyYzNlZSIgZD0iTTczIDM5Yy0xNC44LTkuMS0zMy40LTkuNC00OC41LS45UzAgNjIuNiAwIDgwVjQzMmMwIDE3LjQgOS40IDMzLjQgMjQuNSA0MS45czMzLjcgOC4xIDQ4LjUtLjlMMzYxIDI5N2MxNC4zLTguNyAyMy0yNC4yIDIzLTQxcy04LjctMzIuMi0yMy00MUw3MyAzOXoiLz48L3N2Zz4=') no-repeat;
+  background-size: contain;
+  top: 23%;
+  left: 33%;
+  transform: rotate(0);
+}
+
 .count{
   font-family: "Micro 5", sans-serif;
   position: absolute;
   /* right: -20%; */
   /* bottom: 400px; */
   bottom: 80.2%;
-  left: 51%;
+  left: 45.3%;
+  /* top: 5.5%;
+  left: 52%; */
 
   padding: 20px;
   color: white;
   font-size: 24px;
   padding: 0 10px;
   opacity: 0;
+  gap: 10px;
 }
 
 .count .current-index{
   /* font-size: 360px; */
   font-size: 50px;
-  position: absolute;
+  /* position: absolute; */
   bottom: 0;
   /* right: 200px; */
   right: 55px;
@@ -217,7 +243,7 @@ picture img{width: 100%;}
 
   width: auto;
   opacity: 0.4;
-  position: absolute;
+  /* position: absolute; */
   bottom: 0;
   right: 0;
   /* width: 200px; */

@@ -19,13 +19,16 @@
   <main class="contents">
       <div id="visual" class="visual">
       </div>
-  
-    <div class="carousel">
 
       <div class="carousel-btns">
         <button class="btn btn-prv"></button>
         <button class="btn btn-next"></button>
+        <button class="btn play"></button>
       </div>
+      
+    <div class="carousel">
+
+
 
       <div class="carousel-track">
   
@@ -43,13 +46,13 @@
               </picture>
           </div>
         </div>
-        <div class="crousel-slide">
+        <!-- <div class="crousel-slide">
           <div class="slide-content">
               <picture class="img robot">
                 <img src="./public/static/themes/img/robot.webp" alt="">
               </picture>
           </div>
-        </div>
+        </div> -->
         <div class="crousel-slide">
           <div class="slide-content">
               <picture class="img knight">
@@ -64,13 +67,13 @@
               </picture>
           </div>
         </div>
-        <div class="crousel-slide">
+        <!-- <div class="crousel-slide">
           <div class="slide-content">
               <picture class="img robot">
                 <img src="./public/static/themes/img/robot.webp" alt="">
               </picture>
           </div>
-        </div>
+        </div> -->
         <div class="crousel-slide">
           <div class="slide-content">
               <picture class="img redknight">
@@ -85,7 +88,7 @@
               </picture>
           </div>
         </div>
-        <div class="crousel-slide">
+        <!-- <div class="crousel-slide">
           <div class="slide-content">
               <picture class="img robot">
                 <img src="./public/static/themes/img/robot.webp" alt="">
@@ -98,7 +101,7 @@
                 <img src="./public/static/themes/img/knight.webp" alt="">
               </picture>
           </div>
-        </div>
+        </div> -->
         
       </div>
 
@@ -139,7 +142,11 @@
   import Carousel from './static/js/script'
 
 
-  const slideInit = Carousel('.carousel');
+  const slideInit = Carousel('.carousel', {
+    speed: 0.5,
+    delay: 'none',
+    // conChangeActive: (data) => { console.log('슬라이드 가운데 위치 / 유저 정보 : ', data) },
+  });
 
 
 
@@ -165,7 +172,6 @@
   // 		);
   // 	});
 
-  //마법진 색깔 중간중간 노란색으로 바뀌었으면 좋겠음
   //주변에 파티클 있었으면 좋겠음
 
 
