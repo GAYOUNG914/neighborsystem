@@ -3,7 +3,7 @@
 
 html, body, ul, li, p {margin: 0; padding: 0;}
 html, body {height: 100%; overflow: hidden;}
-body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%); box-sizing: border-box;}
+body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%); box-sizing: border-box; min-width: 1080px;}
 
 :root{
   --slide-width: 300px;
@@ -13,7 +13,8 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
   position: relative;
   min-width: 1060px;
   max-width: 150vh;
-  height: 100vh;
+  /* height: 100vh; */
+  height: 1220px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -25,8 +26,7 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
   bottom: 0;
   transform: translate3d(-50%, 0, 0);
   z-index: 2;
-  width: 100%; 
-  height: 60%;
+  width: 100%; height: 752px;
 }
 
 .carousel{
@@ -142,6 +142,20 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
 
 picture img{width: 100%;}
 
+.magiccircle{
+  /* display: none; */
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  filter: blur(10px);
+  -webkit-filter: blur(10px);
+  /* width: 1250px; */
+  width: 0;
+  opacity: 0.6;
+  animation: roll 90s linear infinite;
+}
+
 .carousel-btns{
   position: fixed;
   display: flex;
@@ -249,11 +263,121 @@ picture img{width: 100%;}
   /* width: 200px; */
 }
 
+.board{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* position: absolute; */
+  position: relative;
+  left: 50%;
+  top: 41.5%;
+  transform: translate(-50%, -50%);
+  max-width: 1345px; 
+  min-width: 1110px;; 
+  perspective: 1000px;
+  perspective-origin: top center;
+  z-index: 111;
+  
+  /* display: none; */
+}
+
+.board-item{
+  display: inline-block;
+  overflow-y: auto;
+  border-radius: 15px;
+  border: 1px solid rgba(133,162,184,.6);
+  background: linear-gradient(138deg,#0b243c,#236292 51%,#0b2642 80%);
+  opacity: .8;
+  padding: 20px;
+  width: 220px;
+  max-height: 400px;
+  margin-top: -14px;
+}
+
+.board-item::-webkit-scrollbar{
+  width: 10px;
+}
+
+.board-item::-webkit-scrollbar-track{
+  background-color: transparent;
+  padding: 10px 0;
+}
+
+.board-item::-webkit-scrollbar-thumb{
+  background-color: #85a3b866;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  border-top-width: 10px;
+  border-bottom-width: 10px;
+  background-clip: padding-box;
+}
+
+.board-item .board-content .item{
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.board-item .board-content .item:first-child{
+  margin-top: 0;
+}
+
+.board-item .text{
+  color: white;
+}
+
+.board-item .score{
+  font-size: 24px;
+  color: white;
+}
+
+.board-item .text strong{
+  font-size: 14px;
+}
+
+.board-item .text p{
+  font-size: 12px;
+  margin-top: 10px;
+  color: skyblue;
+}
+
+.board-item.right{
+  transform: rotateY(-60deg);
+}
+.board-item.left{
+  transform: rotateY(60deg);
+}
+
+.svg-line{
+  position: absolute;
+  opacity: 0.2;
+  top: -19%;
+}
+.svg-line svg{
+  width: 400px;
+}
+.svg-line.left{
+  left: 10%;
+  transform: rotateY(-180deg);
+}
+.svg-line.right{
+  right: 9%;
+}
+
 @keyframes robots {
   0%{
     transform: translateY(-1%);
   }
   100%{
     transform: translateY(1%);
+  }
+}
+
+@keyframes roll {
+  0%{
+    transform: translate(-50%,-50%) rotate(0deg);
+  }
+  100%{
+    transform: translate(-50%,-50%) rotate(360deg);
   }
 }

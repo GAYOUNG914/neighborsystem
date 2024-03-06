@@ -12,11 +12,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./static/themes/reset.css">
 <link rel="stylesheet" href="./static/themes/style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 
 <body>
 
   <main class="contents">
+    <picture class="magiccircle">
+      <img src="./public//static/themes/img/magiccircle.png" alt="">
+    </picture>
       <div id="visual" class="visual">
       </div>
 
@@ -25,11 +29,8 @@
         <button class="btn btn-next"></button>
         <button class="btn play"></button>
       </div>
-      
+
     <div class="carousel">
-
-
-
       <div class="carousel-track">
   
         <div class="crousel-slide">
@@ -104,13 +105,158 @@
         </div> -->
         
       </div>
-
     </div>
 
-    <!-- <div class="board">
-      <div class="board-item right"></div>
-      <div class="board-item left"></div>
-    </div> -->
+    <div class="board">
+      <div class="svg-line left">
+        <svg width="516" height="77" viewBox="0 0 516 77" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 1C0 1 407.106 1 440.5 1C473.894 1 467 2.99999 514.5 75.5" stroke="url(#paint0_linear_2_4)" stroke-width="2"/>
+        <defs>
+        <linearGradient id="paint0_linear_2_4" x1="0" y1="44" x2="547" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#3DF3FF"/>
+        <stop offset="0.325" stop-color="#2A70FF"/>
+        <stop offset="0.66" stop-color="#D21DFF"/>
+        <stop offset="1" stop-color="#16FFE3"/>
+        </linearGradient>
+        </defs>
+        </svg>
+      </div>
+      <div class="board-item left">
+        <ul class="board-content">
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>우와막엄청세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>우와막엄청세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>우와막엄청세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="svg-line right">
+        <svg width="516" height="77" viewBox="0 0 516 77" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 1C0 1 407.106 1 440.5 1C473.894 1 467 2.99999 514.5 75.5" stroke="url(#paint0_linear_2_4)" stroke-width="2"/>
+        <defs>
+        <linearGradient id="paint0_linear_2_4" x1="0" y1="44" x2="547" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#3DF3FF"/>
+        <stop offset="0.325" stop-color="#2A70FF"/>
+        <stop offset="0.66" stop-color="#D21DFF"/>
+        <stop offset="1" stop-color="#16FFE3"/>
+        </linearGradient>
+        </defs>
+        </svg>
+      </div>
+      <div class="board-item right">
+        <ul class="board-content">
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+          <li class="item">
+            <div class="score">20</div>
+            <div class="text">
+              <strong>공격력</strong>
+              <p>아주많이세요</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
     <div class="count">
       <span class="current-index"></span>
       <span class="slides-length"></span>
@@ -354,7 +500,6 @@
 
       createDecoPlanes();
 
-
       window.addEventListener('resize', onResize);
       onResize();
 
@@ -565,7 +710,7 @@
       // });
       // plane.position.z = -1.9;
 
-      // setDecoPlaneRotation(plane, 1);
+      setDecoPlaneRotation(plane, 1);
       // decoTimeline.fromTo(plane.scale, { x: 0 }, { x: 1, duration: 1.5, ease: 'expo.inOut', onUpdate: onDecoPlaneTimelineUpdate, onUpdateParams: [plane] }, 0.2);
 
       // top

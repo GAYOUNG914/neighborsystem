@@ -1,6 +1,5 @@
 // // import '../themes/style.scss';
 
-////carousel
 export default function Carousel(domElem, option){
 
   const prevButton = document.querySelector('.btn-prv');
@@ -14,10 +13,13 @@ export default function Carousel(domElem, option){
   const $countprevBtn = document.querySelector('.carousel-btns .btn-prv');
   const $countnextBtn = document.querySelector('.carousel-btns .btn-next');
   const $countplayBtn = document.querySelector('.carousel-btns .play');
+  const $magiccircle = document.querySelector('.magiccircle');
   let slides = document.querySelectorAll('.crousel-slide');
   let currentIndex = 0;
   let isPlaying = false;
+  let windowHasFocus = true;
   let interval;
+
 
   option.speed = option.speed || 0.3 ;
   option.delay = option.delay;
@@ -25,6 +27,7 @@ export default function Carousel(domElem, option){
   // option.lightColor = option.lightColor;
   option.onChangeActive = option.onChangeActive;
 
+  gsap.to( $magiccircle, {width: 1220, opacity: 1, delay: 1.8, duration: 1.4, ease: "expo.out" });
   gsap.to( $slider, {y: -150, opacity: 1, delay: 1.85, duration: 1.4, ease: "expo.out" });
   gsap.to( $count, {opacity: 1, delay: 2.45, duration: 0.5, ease: "expo.out" });
   gsap.to( $countprevBtn, {x: -60, opacity: 1, delay: 2.3, duration: 0.5, ease: "expo.inout" });
@@ -147,7 +150,6 @@ export default function Carousel(domElem, option){
   //canvas height 1.5 배
 
   //플러그인화(스피드,딜레이,액티브 슬라이드 정보 콘솔찍기, 이미지 제거 후 사용 가능하게
-  //autoplay && pause
   //api 클릭 이벤트 (노션 참고)
   
   //여러개 드래그
@@ -338,7 +340,23 @@ export default function Carousel(domElem, option){
     isPlaying = !isPlaying;
 
   }
-  
+
+
+function onBlur(){
+  windowHasFocus = false;
+  isPlaying = true;
+  onAutoplayButton();
+  console.log('lose focus');
+}
+
+function onFocus(){
+  windowHasFocus = true;
+  isPlaying = false;
+  clearInterval(interval);
+  setTimeout(onAutoplayButton,0);
+  console.log('get focus');
+}
+
   setTimeout(onAutoplayButton,1700);
   initSlideIndex();
   moveSlide(currentIndex);
@@ -353,4 +371,7 @@ export default function Carousel(domElem, option){
   $slider.addEventListener('mouseleave',onMouseleave);
   $slider.addEventListener('mouseup',onMouseup);
   $slider.addEventListener('mousemove', (e) => onMousemove(e));
+  
+  window.addEventListener('blur',onBlur);
+  window.addEventListener('focus',onFocus);
 }
