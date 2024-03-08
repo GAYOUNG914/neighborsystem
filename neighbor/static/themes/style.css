@@ -16,8 +16,8 @@ body {background: radial-gradient(circle at 50% 100%, #000000 46%, #6197ff 158%)
   object-fit: cover;
   z-index: -10;
   opacity: 0;
-  animation: background 0.5s 1.8s ease-in-out forwards;
-  transition: .2s;
+  /* animation: background 0.5s 1.8s ease-in-out forwards; */
+  /* transition: .2s; */
 }
 
 .nothing{
@@ -188,7 +188,8 @@ picture img{width: 100%;}
   gap: 20px;
   margin-bottom: 40px;
   z-index: 99;
-  left: 45%;
+  left: 50%;
+  transform: translateX(-50%);
   top: 16.5%;
 }
 
@@ -251,12 +252,10 @@ picture img{width: 100%;}
 .count{
   font-family: "Micro 5", sans-serif;
   position: absolute;
-  /* right: -20%; */
-  /* bottom: 400px; */
   bottom: 80.2%;
-  left: 45.3%;
-  /* top: 5.5%;
-  left: 52%; */
+  /* left: 45.3%; */
+  left: 48%;
+  transform: translateX(-50%);
 
   padding: 20px;
   color: white;
@@ -290,7 +289,6 @@ picture img{width: 100%;}
 .board{
   display: flex;
   justify-content: space-between;
-  align-items: center;
   /* position: absolute; */
   position: relative;
   left: 50%;
@@ -305,7 +303,6 @@ picture img{width: 100%;}
 }
 
 .board-item{
-  top: 0;
   display: inline-block;
   overflow-y: auto;
   border-radius: 15px;
@@ -338,6 +335,7 @@ picture img{width: 100%;}
 
 .board-item .board-content .item{
   display: flex;
+  align-items: center;
   gap: 15px;
   margin-top: 20px;
 }
@@ -378,8 +376,13 @@ picture img{width: 100%;}
 
 .svg-line-wrap{
   position: absolute;
-    top: 17%;
-    width: 100vw;
+  left: 50%;
+  top: 17%;
+  transform: translateX(-50%);
+  width: 100vw;
+  /* max-width: 1345px; */
+  /* min-width: 1110px; */
+  width: 1345px;
 }
 
 .svg-line{

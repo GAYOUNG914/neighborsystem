@@ -15,14 +15,15 @@ export default function Carousel(domElem, option){
   const $countnextBtn = document.querySelector('.carousel-btns .btn-next');
   const $countplayBtn = document.querySelector('.carousel-btns .play');
   const $boards = document.querySelectorAll('.board-item');
-  const $boardListsRight = document.querySelectorAll('.board-item.right .item');
-  const $boardListsLeft = document.querySelectorAll('.board-item.left .item');
+  const $background = document.querySelector('.background');
   const $magiccircle = document.querySelector('.magiccircle');
   let slides = document.querySelectorAll('.crousel-slide');
   let currentIndex = 0;
   let isPlaying = false;
   let windowHasFocus = true;
   let interval, pregress;
+  let isDragging = false;
+  let startX, percent;
 
 
   option.speed = option.speed || 0.3 ;
@@ -31,8 +32,6 @@ export default function Carousel(domElem, option){
   // option.lightColor = option.lightColor;
   option.onChangeActive = option.onChangeActive;
 
-
-
   gsap.to( $magiccircle, {width: 1220, opacity: 1, delay: 1.8, duration: 1.4, ease: "expo.out" });
   gsap.to( $slider, {y: -150, opacity: 1, delay: 1.85, duration: 1.4, ease: "expo.out" });
   gsap.to( $count, {opacity: 1, delay: 2.45, duration: 0.5, ease: "expo.out" });
@@ -40,25 +39,7 @@ export default function Carousel(domElem, option){
   gsap.to( $countnextBtn, {x: 60, opacity: 1, delay: 2.3, duration: 0.5, ease: "expo.inout" });
   gsap.to( $countplayBtn, {x: 70, opacity: 1, delay: 2.3, duration: 0.5, ease: "expo.inout" });
   gsap.to( $boards, {height: 700, delay: 2.7, duration: 1, ease: "expo.inout", opacity: 0.7 });
-
-  // setTimeout(()=>{
-  //   for(let i = 0; i < $boardListsRight.length; i++){
-  //     $boardListsRight[i].style.transition = `0.2s`;
-  //     $boardListsRight[i].style.transitionDelay = `0.${i}s`;
-  //     $boardListsRight[i].style.transform = `transform: rotateX(180deg)`;
-
-  //   }
-  // },3500)
-
-  // setTimeout(()=>{
-  //   for(let i = 0; i < $boardListsLeft.length; i++){
-  //     $boardListsLeft[i].style.transition = `0.2s`;
-  //     $boardListsLeft[i].style.transitionDelay = `0.${i}s`;
-  //     $boardListsLeft[i].style.transform = `transform: rotateX(180deg)`;
-
-  //   }
-  // },3500)
-
+  gsap.to( $background, {scale: 1.2, delay: 1.9, opacity: 0.6, duration: 0.6, ease: "expo.inout" });
 
   function initSlideIndex(){
     $slidesLength.textContent = '/' + slides.length;
@@ -161,20 +142,6 @@ export default function Carousel(domElem, option){
 
     setTranslation();
   }
-  
-  //마법진 안 잘리게 + 다듬기 (a : 실린더로 빛 효과)
-  //canvas height 1.5 배
-
-  //플러그인화(스피드,딜레이,액티브 슬라이드 정보 콘솔찍기, 이미지 제거 후 사용 가능하게
-  //api 클릭 이벤트 (노션 참고)
-  
-  //여러개 드래그
-  //보드판 나오게 작업
-
-  //====드래그====
-  //progress
-  let isDragging = false;
-  let startX, scrollLeft, percent, endX;
 
   function onMousedown(e){
     isDragging = true;
@@ -224,7 +191,7 @@ export default function Carousel(domElem, option){
     percent = walk/5;
 
     giveTranslation(percent);
-    console.log('move')
+    // console.log('move')
     // $slider.removeEventListener('mousemove', (e) => onMousemove(e));
   }
 
@@ -382,53 +349,47 @@ export default function Carousel(domElem, option){
 
   }
 
+  function onBlur(){
+    windowHasFocus = false;
+    isPlaying = true;
+    onAutoplayButton();
 
-  const $background = document.querySelector('.background');
-  $background.style.transform = 'scale(1.2)';
+    $magiccircle.style.animation = 'none';
+    for(let a of $robotImgs){
+      //로봇이미지 멈추게
+      a.style.animation = 'none';
+      a.style.transform = 'translateY(-1%)'
+    }
 
-function onBlur(){
-  windowHasFocus = false;
-  isPlaying = true;
-  onAutoplayButton();
-
-  $magiccircle.style.animation = 'none';
-  for(let a of $robotImgs){
-    //로봇이미지 멈추게
-    // a.style.animation = 'none';
+    console.log('lose focus');
   }
 
-  console.log('lose focus');
-}
+  function onFocus(){
+    windowHasFocus = true;
+    isPlaying = false;
+    clearInterval(interval);
+    setTimeout(onAutoplayButton,0);
 
-function onFocus(){
-  windowHasFocus = true;
-  isPlaying = false;
-  clearInterval(interval);
-  setTimeout(onAutoplayButton,0);
+    $magiccircle.style.animation = 'roll 90s linear infinite';
+    for(let a of $robotImgs){
+      //로봇이미지 멈추게
+      a.style.animation = 'robots 1s ease-in infinite alternate';
+    }
 
-  $magiccircle.style.animation = 'roll 90s linear infinite';
-  for(let a of $robotImgs){
-    //로봇이미지 멈추게
-    // a.style.animation = 'robots 1s ease-in infinite alternate';
+    console.log('get focus');
   }
 
-  console.log('get focus');
-}
+  function mouseMoving(e){
+    let valX = innerWidth/2 - e.pageX;
+    let valY = innerHeight/2 - e.pageY;
 
-
-
-function mouseMoving(e){
-  let valX = innerWidth/2 - e.pageX;
-  let valY = innerHeight/2 - e.pageY;
-
-  gsap.to( $background, {x: valX/50, y: valY/50, scale:1.2});
-}
+    gsap.to( $background, {x: valX/50, y: valY/50});
+  }
 
   setTimeout(onAutoplayButton,1700);
   initSlideIndex();
   moveSlide(currentIndex);
   setTranslation();
-
 
   prevButton.addEventListener('click',onPrevButton)
   nextButton.addEventListener('click',onNextButton)
